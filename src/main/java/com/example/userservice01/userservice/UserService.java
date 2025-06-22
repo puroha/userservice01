@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -68,19 +69,19 @@ public class UserService {
 
 
     public Token login(LoginRequestDto loginDto) {
-        User user = userRepo.findByEmail(loginDto.getEmail());
-        if (user == null) {
+        Optional<User> user = userRepo.findByEmail(loginDto.getEmail());
+        if (user.isEmpty()) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
         // Check if the password matches
 
         // Check if the password matches
-        if (!passwordEncoder.matches(loginDto.getPassword(), user.getHashedPassword())) {
+        if (!passwordEncoder.matches(loginDto.getPassword(), user.get().getHashedPassword())) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        return getRandomToken(user);
+        return getRandomToken(user.orElse(null));
     }
 
     private Token getRandomToken(User user) {
